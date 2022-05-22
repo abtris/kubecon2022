@@ -2,6 +2,8 @@ require('dotenv').config()
 
 const PlaylistSummary = require('youtube-playlist-summary')
 const table = require('markdown-table');
+var toc = require('markdown-toc');
+
 
 const config = {
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
@@ -41,26 +43,44 @@ playlists = [
   },
 ];
 
-function markdownTable(title, titleUrl, tableContent) {
-  console.log(`## [${title}](${titleUrl})\n`)
-  console.log(table(tableContent))
-  console.log("\n")
+function getDocument(content) {
+  console.log("# KubeCon 2022\n");
+  console.log(toc(content).content);
+  console.log(content);
 }
 
-function getPlaylist(playlistId) {
-  ps.getPlaylistItems(playlistId)
+
+function markdownTable(title, titleUrl, tableContent) {
+  content = ""
+  content += `## ${title}\n\n`;
+  content += `- [Youtube](${titleUrl}) \n\n`;
+  content += table(tableContent);
+  content += "\n\n";
+  return content;
+}
+
+function getPlaylist(playlist) {
+  return ps.getPlaylistItems(playlist.id)
     .then((result) => {
       tableContent = [["Name", "Description", "Youtube url", "Published At"]]
       result.items.forEach(row => {
         tableContent.push([row.title, row.description.replace(/(\r\n|\n|\r)/gm, ""), row.videoUrl, row.publishedAt])
       });
-      markdownTable(result.playlistTitle, result.playlistUrl, tableContent)
+      return markdownTable(result.playlistTitle, result.playlistUrl, tableContent);
     })
     .catch((error) => {
       console.error(error)
     })
 }
 
-playlists.forEach(playlist => {
-  getPlaylist(playlist.id)
+
+var actions = playlists.map(getPlaylist);
+var results = Promise.all(actions);
+fullContent = results.then(data => {
+  return data.join(" ")
 });
+fullContent.then(data => {
+  getDocument(data)
+})
+
+
