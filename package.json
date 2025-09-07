@@ -9,7 +9,7 @@
   "author": "ladislav@prskavec.net",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.0.1",
+    "dotenv": "^17.0.0",
     "markdown-table": "^3.0.0",
     "markdown-toc": "^1.2.0",
     "youtube-playlist-summary": "^2.1.6"
